@@ -1,13 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fcm_config/fcm_config.dart';
 
 import './screens/chat_screen.dart';
 import './screens/auth_screen.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Handling a background message: ${message.messageId}");
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  FCMConfig.instance.init(
+    defaultAndroidChannel: AndroidNotificationChannel(
+      'high_importance_channel', // same as value from android setup
+      'Fcm config',
+      importance: Importance.high,
+      sound: RawResourceAndroidNotificationSound('notification'),
+    ),
+    onBackgroundMessage: _firebaseMessagingBackgroundHandler,
+  );
+  FCMConfig.instance.messaging.getToken().then((token) {
+    print(token);
+  });
   runApp(MyApp());
 }
 
